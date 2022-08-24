@@ -2,6 +2,10 @@
 
 const request = require("supertest");
 
+const Company = require("../models/company");
+
+Company.findAll = jest.fn();
+
 const db = require("../db");
 const app = require("../app");
 
@@ -94,7 +98,105 @@ describe("GET /companies", function () {
             },
           ],
     });
+    
+  test("query filters, name", async function () {
+    const resp = await request(app).get("/companies/").query({name: "1"});
+    
+    expect(Company.findAll).toHaveBeenCalledWith({name: "1"});
+    expect(resp.body).toEqual({
+      companies:
+        [
+          {
+            handle: "c1",
+            name: "C1",
+            description: "Desc1",
+            numEmployees: 1,
+            logoUrl: "http://c1.img",
+          }
+        ],
+    });
   });
+  test("query filters, min employees", async function () {
+    const resp = await request(app).get("/companies/").query({minEmployees: 2});
+    
+    expect(Company.findAll).toHaveBeenCalledWith({minEmployees: 2});
+    expect(resp.body).toEqual({
+      companies:
+        [
+          {
+            handle: "c2",
+            name: "C2",
+            description: "Desc2",
+            numEmployees: 2,
+            logoUrl: "http://c2.img",
+          },
+          {
+            handle: "c3",
+            name: "C3",
+            description: "Desc3",
+            numEmployees: 3,
+            logoUrl: "http://c3.img",
+          },
+        ],
+    });
+  });
+  test("query filters, max employees", async function () {
+    const resp = await request(app).get("/companies/").query({maxEmployees: 2});
+    
+    expect(Company.findAll).toHaveBeenCalledWith({maxEmployees: 2});
+    expect(resp.body).toEqual({
+      companies:
+        [
+          {
+            handle: "c2",
+            name: "C2",
+            description: "Desc2",
+            numEmployees: 2,
+            logoUrl: "http://c2.img",
+          },
+          {
+            handle: "c3",
+            name: "C3",
+            description: "Desc3",
+            numEmployees: 3,
+            logoUrl: "http://c3.img",
+          },
+        ],
+    });
+  });
+  test("query filters, multiple filters", async function () {
+    const resp = await request(app).get("/companies/").query({name: "1", maxEmployees: 2});
+    
+    await db.query(`
+    INSERT INTO companies(handle, name, num_employees, description, logo_url)
+    VALUES ('c4', 'C4', 2, 'Desc1', 'http://c1.img')`);
+    
+    expect(Company.findAll).toHaveBeenCalledWith({name: "1", maxEmployees: 2});
+    expect(resp.body).toEqual({
+      companies:
+        [
+          {
+            handle: "c1",
+            name: "C1",
+            description: "Desc1",
+            numEmployees: 1,
+            logoUrl: "http://c1.img",
+          },
+        ],
+    });
+  });
+  
+  
+    
+    
+// route test: 
+// - happy route for no query string
+// - many happy routes for different querystring paramaters
+// - sad route min>max - return 400
+// - sad route for invalid filter fields passed in
+    
+    
+  
 
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
