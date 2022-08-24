@@ -53,6 +53,8 @@ class Company {
   static async findAll(queryFilters = {}) {
     //QUESTION: Should we breake this up
     //makes whereString like: 'WHERE name ilike $1 and min_employees <=10'
+    console.log("STARTING FIND ALL FUNCTION");
+
     let whereString = "";
     let queryParams = [];
 
@@ -85,8 +87,11 @@ class Company {
     ORDER BY name`;
 
     const companiesRes = await db.query(sqlSelect, queryParams);
-    if (companiesRes.rows.length === 0) 
-      {throw new BadRequestError("No Results Found")}
+
+    console.log("companiesRes: ", companiesRes.rows);
+    if (companiesRes.rows.length === 0) {
+      throw new BadRequestError("No Results Found");
+    }
 
     return companiesRes.rows;
   }
