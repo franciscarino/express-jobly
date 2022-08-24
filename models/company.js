@@ -18,16 +18,17 @@ class Company {
 
   static async create({ handle, name, description, numEmployees, logoUrl }) {
     const duplicateCheck = await db.query(
-        `SELECT handle
+      `SELECT handle
            FROM companies
            WHERE handle = $1`,
-        [handle]);
+      [handle]
+    );
 
     if (duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate company: ${handle}`);
 
     const result = await db.query(
-        `INSERT INTO companies(
+      `INSERT INTO companies(
           handle,
           name,
           description,
@@ -36,35 +37,65 @@ class Company {
            VALUES
              ($1, $2, $3, $4, $5)
            RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`,
-        [
-          handle,
-          name,
-          description,
-          numEmployees,
-          logoUrl,
-        ],
+      [handle, name, description, numEmployees, logoUrl]
     );
     const company = result.rows[0];
 
     return company;
   }
 
-  /** Find all companies.
-   *
+  /** Find all companies, filters by arguments passed in
+   * pass in queryFilter like:
+   *  {name: "compname", minEmployees: 5, maxEmployees: 10}
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
-    const companiesRes = await db.query(
-        `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`);
+  static async findAll(queryFilters = {}) {
+    //QUESTION: Should we breake this up
+    //makes whereString like: 'WHERE name ilike $1 and min_employees <=10'
+    let whereString = "";
+    let queryParams = [];
+
+    if (Object.keys(queryFilters).length != 0) {
+      whereString = "WHERE ";
+      if (queryFilters.name) {
+        queryParams.push(`%${queryFilters.name}%`);
+        whereString += `name ilike $1 `;
+      }
+      if (queryFilters.minEmployees) {
+        whereString += queryParams.length > 0 ? "and " : "";
+        queryParams.push(queryFilters.minEmployees);
+        whereString += `num_employees >= $${queryParams.length} `;
+      }
+      if (queryFilters.maxEmployees) {
+        whereString += queryParams.length > 0 ? "and " : "";
+        queryParams.push(queryFilters.maxEmployees);
+        whereString += `num_employees <= $${queryParams.length} `;
+      }
+    }
+
+    //include whereString in SQL, empty string if no filters passed in
+    let sqlSelect = `SELECT handle,
+    name,
+    description,
+    num_employees AS "numEmployees",
+    logo_url AS "logoUrl"
+    FROM companies
+    ${whereString}
+    ORDER BY name`;
+
+    const companiesRes = await db.query(sqlSelect, queryParams);
+    if (companiesRes.rows.length === 0) 
+      {throw new BadRequestError("No Results Found")}
+
     return companiesRes.rows;
   }
+
+  //   Models/company:
+  // - update get all method
+  // - accepts parameters for filtering as optional arguments
+  // - generates SQL
+  // - returns "Query returned no results" in 400
 
   /** Given a company handle, return data about company.
    *
@@ -76,14 +107,15 @@ class Company {
 
   static async get(handle) {
     const companyRes = await db.query(
-        `SELECT handle,
+      `SELECT handle,
                 name,
                 description,
                 num_employees AS "numEmployees",
                 logo_url AS "logoUrl"
            FROM companies
            WHERE handle = $1`,
-        [handle]);
+      [handle]
+    );
 
     const company = companyRes.rows[0];
 
@@ -105,12 +137,10 @@ class Company {
    */
 
   static async update(handle, data) {
-    const { setCols, values } = sqlForPartialUpdate(
-        data,
-        {
-          numEmployees: "num_employees",
-          logoUrl: "logo_url",
-        });
+    const { setCols, values } = sqlForPartialUpdate(data, {
+      numEmployees: "num_employees",
+      logoUrl: "logo_url",
+    });
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `
@@ -133,16 +163,16 @@ class Company {
 
   static async remove(handle) {
     const result = await db.query(
-        `DELETE
+      `DELETE
            FROM companies
            WHERE handle = $1
            RETURNING handle`,
-        [handle]);
+      [handle]
+    );
     const company = result.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
 }
-
 
 module.exports = Company;

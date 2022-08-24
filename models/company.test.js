@@ -140,24 +140,11 @@ describe("findAll", function () {
     ]);
   });
 
-  test("works: filter by name, minEmp, maxEmp", async function () {
-    try {
-      let companies = await Company.findAll({
-        name: "2",
-        minEmployees: 2,
-        maxEmployees: 2,
-      });
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-
   test("works: filter by name, maxEmp", async function () {
     await db.query(`
     INSERT INTO companies(handle, name, num_employees, description, logo_url)
     VALUES ('c4', 'C4', 2, 'Desc1', 'http://c1.img')`);
-
+    
     let companies = await Company.findAll({
       name: "1",
       maxEmployees: 2,
@@ -172,14 +159,21 @@ describe("findAll", function () {
       },
     ]);
   });
-
-  test("works: query with no results", async function () {
-    let companies = await Company.findAll({
-      name: "nope",
-      minEmployees: 5,
-    });
-    expect(companies).toEqual([{}]);
+  
+  test("query with no results", async function () {
+    try {
+      let companies = await Company.findAll({
+        name: "1",
+        minEmployees: 2,
+        maxEmployees: 2,
+      });
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual("No Results Found");
+    }
   });
+
 });
 
 // model test:
