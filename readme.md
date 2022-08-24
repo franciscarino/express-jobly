@@ -33,7 +33,7 @@ model test:
 route:
 - logically select getAll or getSome based on query string if query string is length zero
 - handle min>max
-- error handling on validation for no extra query fields passed in
+
 
 route test: 
 - happy route for no query string
