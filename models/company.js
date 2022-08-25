@@ -51,9 +51,13 @@ class Company {
    * */
 
   static async findAll(queryFilters = {}) {
-    //QUESTION: Should we breake this up
+    //QUESTION: Should we break this up
     //makes whereString like: 'WHERE name ilike $1 and min_employees <=10'
-    console.log("STARTING FIND ALL FUNCTION");
+
+    for (let key in queryFilters) {
+      const filters = ["name", "minEmployees", "maxEmployees"];
+      if (!filters.includes(key)) throw new BadRequestError("Invalid filter.");
+    }
 
     let whereString = "";
     let queryParams = [];
@@ -87,13 +91,14 @@ class Company {
     ORDER BY name`;
 
     const companiesRes = await db.query(sqlSelect, queryParams);
-
-    console.log("companiesRes: ", companiesRes.rows);
-    if (companiesRes.rows.length === 0) {
-      throw new BadRequestError("No Results Found");
+    console.log("length: ", companiesRes.rows.length);
+    if (companiesRes.rows.length != 0) {
+      return companiesRes.rows;
     }
 
-    return companiesRes.rows;
+    console.log("companiesRes", companiesRes.rows);
+    throw new BadRequestError(`No Results Found`);
+    //QUESTION: WHAT IS GOING ON HERE?!?!?!
   }
 
   //   Models/company:

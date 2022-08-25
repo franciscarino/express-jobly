@@ -8,6 +8,8 @@ const app = require("../app");
 // const Company = require("../models/company");
 // Company.findAll = jest.fn();
 
+const Company = require('../models/company')
+const {BadRequestError} = require('../expressError')
 const {
   commonBeforeAll,
   commonBeforeEach,
@@ -101,7 +103,7 @@ describe("GET /companies", function () {
   test("query filters, name", async function () {
     const resp = await request(app).get("/companies/").query({ name: "1" });
 
-    expect(Company.findAll).toHaveBeenCalledWith({ name: "1" });
+    // expect(Company.findAll).toHaveBeenCalledWith({ name: "1" });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -120,7 +122,7 @@ describe("GET /companies", function () {
       .get("/companies/")
       .query({ minEmployees: 2 });
 
-    expect(Company.findAll).toHaveBeenCalledWith({ minEmployees: 2 });
+    // expect(Company.findAll).toHaveBeenCalledWith({ minEmployees: 2 });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -146,22 +148,22 @@ describe("GET /companies", function () {
       .get("/companies/")
       .query({ maxEmployees: 2 });
 
-    expect(Company.findAll).toHaveBeenCalledWith({ maxEmployees: 2 });
+    // expect(Company.findAll).toHaveBeenCalledWith({ maxEmployees: 2 });
     expect(resp.body).toEqual({
       companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
         {
           handle: "c2",
           name: "C2",
           description: "Desc2",
           numEmployees: 2,
           logoUrl: "http://c2.img",
-        },
-        {
-          handle: "c3",
-          name: "C3",
-          description: "Desc3",
-          numEmployees: 3,
-          logoUrl: "http://c3.img",
         },
       ],
     });
@@ -176,10 +178,10 @@ describe("GET /companies", function () {
     INSERT INTO companies(handle, name, num_employees, description, logo_url)
     VALUES ('c4', 'C4', 2, 'Desc1', 'http://c1.img')`);
 
-    expect(Company.findAll).toHaveBeenCalledWith({
-      name: "1",
-      maxEmployees: 2,
-    });
+    // expect(Company.findAll).toHaveBeenCalledWith({
+    //   name: "1",
+    //   maxEmployees: 2,
+    // });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -191,6 +193,41 @@ describe("GET /companies", function () {
         },
       ],
     });
+  });
+
+  test("query filters, returns none", async function () {
+    try {
+      const resp = await request(app)
+        .get("/companies")
+        .query({ name: "invalid_name"});
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual("No Results Found");
+    }
+
+    // expect(Company.findAll).toHaveBeenCalledWith({
+    //   name: "1",
+    //   maxEmployees: 2,
+    // });
+   
+  });
+  
+  test("query filters, invalid filter", async function () {
+    try {
+      const resp = await request(app)
+        .get("/companies")
+        .query({ description: "invalid"});
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual("No Results Found");
+    }
+
+    // expect(Company.findAll).toHaveBeenCalledWith({
+    //   name: "description",
+    // });
+    
   });
 
   // route test:
@@ -216,7 +253,6 @@ describe("GET /companies", function () {
 describe("GET /companies/:handle", function () {
   test("works for anon", async function () {
     const resp = await request(app).get(`/companies/c1`);
-    console.log("resp.body 2: ", resp.body);
 
     expect(resp.body).toEqual({
       company: {

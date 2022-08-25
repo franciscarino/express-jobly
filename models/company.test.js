@@ -174,6 +174,18 @@ describe("findAll", function () {
     }
   });
 
+  test("query with invalid filter", async function () {
+    try {
+      let companies = await Company.findAll({
+        description: "anything",
+      });
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual("Invalid filter.");
+    }
+  });
+
 });
 
 // model test:
