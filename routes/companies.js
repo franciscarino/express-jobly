@@ -51,17 +51,10 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  //TODO: Refactor to shorten: convert min max to integers
 
   let newReq = Object.assign(req.query);
-
-  if (newReq.minEmployees) {
-    newReq.minEmployees = parseInt(newReq.minEmployees);
-  }
-
-  if (newReq.maxEmployees) {
-    newReq.maxEmployees = parseInt(newReq.maxEmployees);
-  }
+  if (newReq.minEmployees) newReq.minEmployees = parseInt(newReq.minEmployees);
+  if (newReq.maxEmployees) newReq.maxEmployees = parseInt(newReq.maxEmployees);
 
   const result = jsonschema.validate(newReq, companiesSearch, {
     required: true,
@@ -72,9 +65,7 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-  const queryFilters = newReq;
-  const companies = await Company.findAll(queryFilters);
-
+  const companies = await Company.findAll(newReq);
   return res.json({ companies });
 });
 
