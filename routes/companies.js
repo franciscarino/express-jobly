@@ -51,15 +51,30 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  // QUESTION: Can we add validation for min > max?
+  //TODO: Refactor to shorten: convert min max to integers
 
-  //TODO: convert min max to integers
-  const result = jsonschema.validate(req.query, companiesSearch, {
+  let newReq = Object.assign(req.query);
+  console.log("newReq: ", newReq);
+
+  if (newReq.minEmployees) {
+    newReq.minEmployees = parseInt(newReq.minEmployees);
+  }
+
+  if (newReq.maxEmployees) {
+    newReq.maxEmployees = parseInt(newReq.maxEmployees);
+  }
+
+  const result = jsonschema.validate(newReq, companiesSearch, {
     required: true,
   });
 
+  if (!result.valid) {
+    const errs = result.errors.map((e) => e.stack);
+    throw new BadRequestError(errs);
+  }
+
   const queryFilters = req.query;
-  //QUESTION: should we do this here and fail fast or pass bad parameters to the function
+  //TODO: Move below to the model
 
   const { minEmployees, maxEmployees } = queryFilters;
   if (minEmployees && maxEmployees && minEmployees > maxEmployees) {

@@ -164,14 +164,14 @@ describe("GET /companies", function () {
   });
 
   test("query filters, multiple filters", async function () {
-    // TODO: make comment about adding new company
-    const resp = await request(app)
-      .get("/companies")
-      .query({ name: "1", maxEmployees: 2 });
-
+    // Add new company to test multiple companies with the same amount of emps.
     await db.query(`
     INSERT INTO companies(handle, name, num_employees, description, logo_url)
     VALUES ('c4', 'C4', 2, 'Desc1', 'http://c1.img')`);
+
+    const resp = await request(app)
+      .get("/companies")
+      .query({ name: "1", maxEmployees: 2 });
 
     expect(resp.body).toEqual({
       companies: [
@@ -186,48 +186,29 @@ describe("GET /companies", function () {
     });
   });
 
-  //TODO: remove try/catch
   test("query filters, min > max", async function () {
-    try {
-      const resp = await request(app)
-        .get("/companies")
-        .query({ minEmployees: 2, maxEmployees: 1 });
-      console.log("resp: ", resp);
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-      expect(err.message).toEqual("minEmployees must be <= maxEmployees");
-    }
+    const resp = await request(app)
+      .get("/companies")
+      .query({ minEmployees: 2, maxEmployees: 1 });
+
+    expect(resp.statusCode).toEqual(400);
   });
 
   test("query filters, returns none", async function () {
-    try {
-      const resp = await request(app)
-        .get("/companies")
-        .query({ name: "invalid_name" });
-      console.log("resp: ", resp);
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-      expect(err.message).toEqual("No Results Found");
-    }
+    const resp = await request(app)
+      .get("/companies")
+      .query({ name: "invalid_name" });
+
+    expect(resp.statusCode).toEqual(400);
   });
 
   test("query filters, invalid filter", async function () {
-    try {
-      const resp = await request(app)
-        .get("/companies/")
-        .query({ description: "invalid" });
-    } catch (err) {
-      console.log("typeOfError", typeof err);
-      expect(err instanceof BadRequestError).toBeTruthy();
-      expect(err.message).toEqual("No Results Found");
-    }
-  });
+    const resp = await request(app)
+      .get("/companies/")
+      .query({ description: "invalid" });
 
-  // route test:
-  // - happy route for no query string
-  // - many happy routes for different querystring paramaters
-  // - sad route min>max - return 400
-  // - sad route for invalid filter fields passed in
+    expect(resp.statusCode).toEqual(400);
+  });
 
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---

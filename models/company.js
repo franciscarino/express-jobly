@@ -89,12 +89,11 @@ class Company {
     ORDER BY name`;
 
     const companiesRes = await db.query(sqlSelect, queryParams);
-    console.log("length: ", companiesRes.rows.length);
+
     if (companiesRes.rows.length != 0) {
       return companiesRes.rows;
     }
 
-    console.log("companiesRes hi", companiesRes.rows);
     throw new BadRequestError(`No Results Found`); // TODO: Just return an empty array
   }
 
