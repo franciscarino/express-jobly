@@ -5,11 +5,8 @@ const request = require("supertest");
 const db = require("../db");
 const app = require("../app");
 
-// const Company = require("../models/company");
-// Company.findAll = jest.fn();
-
-const Company = require('../models/company')
-const {BadRequestError} = require('../expressError')
+const Company = require("../models/company");
+const { BadRequestError } = require("../expressError");
 const {
   commonBeforeAll,
   commonBeforeEach,
@@ -103,7 +100,6 @@ describe("GET /companies", function () {
   test("query filters, name", async function () {
     const resp = await request(app).get("/companies").query({ name: "1" });
 
-    // expect(Company.findAll).toHaveBeenCalledWith({ name: "1" });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -122,7 +118,6 @@ describe("GET /companies", function () {
       .get("/companies")
       .query({ minEmployees: 2 });
 
-    // expect(Company.findAll).toHaveBeenCalledWith({ minEmployees: 2 });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -148,7 +143,6 @@ describe("GET /companies", function () {
       .get("/companies")
       .query({ maxEmployees: 2 });
 
-    // expect(Company.findAll).toHaveBeenCalledWith({ maxEmployees: 2 });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -170,6 +164,7 @@ describe("GET /companies", function () {
   });
 
   test("query filters, multiple filters", async function () {
+    // TODO: make comment about adding new company
     const resp = await request(app)
       .get("/companies")
       .query({ name: "1", maxEmployees: 2 });
@@ -178,10 +173,6 @@ describe("GET /companies", function () {
     INSERT INTO companies(handle, name, num_employees, description, logo_url)
     VALUES ('c4', 'C4', 2, 'Desc1', 'http://c1.img')`);
 
-    // expect(Company.findAll).toHaveBeenCalledWith({
-    //   name: "1",
-    //   maxEmployees: 2,
-    // });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -195,40 +186,41 @@ describe("GET /companies", function () {
     });
   });
 
+  //TODO: remove try/catch
+  test("query filters, min > max", async function () {
+    try {
+      const resp = await request(app)
+        .get("/companies")
+        .query({ minEmployees: 2, maxEmployees: 1 });
+      console.log("resp: ", resp);
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual("minEmployees must be <= maxEmployees");
+    }
+  });
+
   test("query filters, returns none", async function () {
     try {
       const resp = await request(app)
         .get("/companies")
-        .query({ name: "invalid_name"});
-      // throw new Error("fail test, you shouldn't get here");
+        .query({ name: "invalid_name" });
+      console.log("resp: ", resp);
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
       expect(err.message).toEqual("No Results Found");
     }
-
-    // expect(Company.findAll).toHaveBeenCalledWith({
-    //   name: "1",
-    //   maxEmployees: 2,
-    // });
-   
   });
-  
+
   test("query filters, invalid filter", async function () {
     try {
       const resp = await request(app)
         .get("/companies/")
-        .query({ description: "invalid"});
-        // throw new Error("fail test, you shouldn't get here");
-      } catch (err) {
-      console.log('typeOfError',typeof err)
+        .query({ description: "invalid" });
+    } catch (err) {
+      console.log("typeOfError", typeof err);
       expect(err instanceof BadRequestError).toBeTruthy();
       expect(err.message).toEqual("No Results Found");
     }
-
-    // expect(Company.findAll).toHaveBeenCalledWith({
-    //   name: "description",
-    // });
-    
   });
 
   // route test:

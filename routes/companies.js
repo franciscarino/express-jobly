@@ -3,6 +3,7 @@
 /** Routes for companies. */
 
 const jsonschema = require("jsonschema");
+const companiesSearch = require("../schemas/companiesSearch.json");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
@@ -50,15 +51,23 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+  // QUESTION: Can we add validation for min > max?
+
+  //TODO: convert min max to integers
+  const result = jsonschema.validate(req.query, companiesSearch, {
+    required: true,
+  });
+
   const queryFilters = req.query;
   //QUESTION: should we do this here and fail fast or pass bad parameters to the function
+
   const { minEmployees, maxEmployees } = queryFilters;
   if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
-    throw new BadRequestError("minEmployees must be <= maxEmployees")
+    throw new BadRequestError("minEmployees must be <= maxEmployees");
   }
 
   const companies = await Company.findAll(queryFilters);
- 
+
   return res.json({ companies });
 });
 

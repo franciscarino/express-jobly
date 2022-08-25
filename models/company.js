@@ -51,25 +51,20 @@ class Company {
    * */
 
   static async findAll(queryFilters = {}) {
-    //QUESTION: Should we break this up
-    
+    //QUESTION: S
+
     //makes whereString like: 'WHERE name ilike $1 and min_employees <=10'
-    for (let key in queryFilters) {
-      const filters = ["name", "minEmployees", "maxEmployees"];
-      if (!filters.includes(key)) {
-        console.log("in bad query filter if")
-        throw new BadRequestError("Invalid filter.");
-      }
-    }
 
     let whereString = "";
     let queryParams = [];
+
+    //TODO: Separate function
 
     if (Object.keys(queryFilters).length != 0) {
       whereString = "WHERE ";
       if (queryFilters.name) {
         queryParams.push(`%${queryFilters.name}%`);
-        whereString += `name ilike $1 `;
+        whereString += `name ilike $1 `; // TODO: use length
       }
       if (queryFilters.minEmployees) {
         whereString += queryParams.length > 0 ? "and " : "";
@@ -84,7 +79,7 @@ class Company {
     }
 
     //include whereString in SQL, empty string if no filters passed in
-    let sqlSelect = `SELECT handle,
+    const sqlSelect = `SELECT handle,
     name,
     description,
     num_employees AS "numEmployees",
@@ -100,9 +95,7 @@ class Company {
     }
 
     console.log("companiesRes hi", companiesRes.rows);
-    throw new BadRequestError(`No Results Found`);
-    
-    //QUESTION: WHAT IS GOING ON HERE?!?!?!
+    throw new BadRequestError(`No Results Found`); // TODO: Just return an empty array
   }
 
   //   Models/company:
