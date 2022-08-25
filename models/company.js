@@ -105,11 +105,6 @@ class Company {
     return { whereString, queryParams };
   }
 
-  //   Models/company:
-  // - update get all method
-  // - accepts parameters for filtering as optional arguments
-  // - generates SQL
-  // - returns "Query returned no results" in 400
 
   /** Given a company handle, return data about company.
    *
