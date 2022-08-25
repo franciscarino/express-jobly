@@ -30,17 +30,29 @@ describe("POST /companies", function () {
     description: "DescNew",
     numEmployees: 10,
   };
+  //TODO: Make this pass
 
-  test("ok for users", async function () {
+  //update from ok for user to ok for admins
+  test("ok for admins", async function () {
     const resp = await request(app)
       .post("/companies")
       .send(newCompany)
-      .set("authorization", `Bearer ${u1Token}`);
+      .set("authorization", `Bearer ${u4Token}`);
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       company: newCompany,
     });
   });
+
+  //add, non-admin can't add company
+  test("unauthorized for non-admin user", async function () {
+    const resp = await request(app)
+      .post("/companies")
+      .send(newCompany)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+    });
+
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
@@ -64,6 +76,7 @@ describe("POST /companies", function () {
     expect(resp.statusCode).toEqual(400);
   });
 });
+
 
 /************************************** GET /companies */
 
@@ -261,13 +274,14 @@ describe("GET /companies/:handle", function () {
 /************************************** PATCH /companies/:handle */
 
 describe("PATCH /companies/:handle", function () {
-  test("works for users", async function () {
+  //update from works for users to works for admins
+  test("works for admins", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
         name: "C1-new",
       })
-      .set("authorization", `Bearer ${u1Token}`);
+      .set("authorization", `Bearer ${u4Token}`);
     expect(resp.body).toEqual({
       company: {
         handle: "c1",
@@ -277,6 +291,17 @@ describe("PATCH /companies/:handle", function () {
         logoUrl: "http://c1.img",
       },
     });
+  });
+
+  //add sad path for non-admin user
+  test("doesn't works for-non admin user", async function () {
+    const resp = await request(app)
+      .patch(`/companies/c1`)
+      .send({
+        name: "C1-new",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
+      expect(resp.statusCode).toEqual(401);
   });
 
   test("unauth for anon", async function () {
@@ -320,11 +345,19 @@ describe("PATCH /companies/:handle", function () {
 /************************************** DELETE /companies/:handle */
 
 describe("DELETE /companies/:handle", function () {
-  test("works for users", async function () {
+  //update from works for users to works for admins
+  test("works for admins", async function () {
+    const resp = await request(app)
+      .delete(`/companies/c1`)
+      .set("authorization", `Bearer ${u4Token}`);
+    expect(resp.body).toEqual({ deleted: "c1" });
+  });
+  //add sad route for non-admin user
+  test("works for admins", async function () {
     const resp = await request(app)
       .delete(`/companies/c1`)
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.body).toEqual({ deleted: "c1" });
+    expect(resp.statusCode).toEqual(401);
   });
 
   test("unauth for anon", async function () {

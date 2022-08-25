@@ -11,33 +11,14 @@ To run the tests:
     jest -i
 
 
-Part 2:
+Part 3:
 
-Models/company:
-- update get all method
-- accepts parameters for filtering as optional arguments
-- generates SQL
-- returns "Query returned no results" in 400
+??Update routes/auth. post/token to add admin status to token
 
-model test:
-- multiple happy paths:
-    - name
-    - min emp
-    - max emp
-    - all of them
-    - query with no results
+add middleware for ensure admin to auth.js
 
-- sad route
-    - 
+in companies routes, add ensureadmin to: post /, patch /:handle, delete /handle
 
-route:
-- logically select getAll or getSome based on query string if query string is length zero
-- handle min>max
+in users routes, add ensureadmin to get /, get /:username, patch, patch /:username, delete/:username
 
-
-route test: 
-- happy route for no query string
-- many happy routes for different querystring paramaters
-- sad route min>max - return 400
-- sad route for invalid filter fields passed in
-
+Maybe additional middleware that checks ensureloggedin || ensureadmin
