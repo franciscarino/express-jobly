@@ -15,6 +15,7 @@ const {
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  u4Token,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -53,8 +54,7 @@ describe("POST /companies", function () {
       .send(newCompany)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
-    });
-
+  });
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
@@ -78,7 +78,6 @@ describe("POST /companies", function () {
     expect(resp.statusCode).toEqual(400);
   });
 });
-
 
 /************************************** GET /companies */
 
@@ -214,7 +213,7 @@ describe("GET /companies", function () {
       .get("/companies")
       .query({ name: "invalid_name" });
 
-    expect(resp.body).toEqual({companies: [] });
+    expect(resp.body).toEqual({ companies: [] });
   });
 
   test("query filters, invalid filter", async function () {
@@ -303,7 +302,7 @@ describe("PATCH /companies/:handle", function () {
         name: "C1-new",
       })
       .set("authorization", `Bearer ${u1Token}`);
-      expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(401);
   });
 
   test("unauth for anon", async function () {
