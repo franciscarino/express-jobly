@@ -56,11 +56,34 @@ class Company {
       throw new BadRequestError("minEmployees must be <= maxEmployees");
     }
 
-    //makes whereString like: 'WHERE name ilike $1 and min_employees <=10'
+    const { whereString, queryParams } = this.generateWhereString(queryFilters);
+
+    //include whereString in SQL, empty string if no filters passed in
+    const sqlSelect = `SELECT handle,
+    name,
+    description,
+    num_employees AS "numEmployees",
+    logo_url AS "logoUrl"
+    FROM companies
+    ${whereString}
+    ORDER BY name`;
+
+    const companiesRes = await db.query(sqlSelect, queryParams);
+
+    return companiesRes.rows;
+  }
+
+  /** generate whereString for passed in search filters
+   * pass in queryFilters like: {name, minEmployees, maxEmployees}
+   * return object like: {
+   *  whereString: 'WHERE name ilike $1 and min_employees <=10',
+   *  queryParams: [ %compName%, 1, 5]
+   *  }
+   */
+
+  static generateWhereString(queryFilters) {
     let whereString = "";
     let queryParams = [];
-
-    //TODO: Separate function
 
     if (Object.keys(queryFilters).length != 0) {
       whereString = "WHERE ";
@@ -79,24 +102,7 @@ class Company {
         whereString += `num_employees <= $${queryParams.length} `;
       }
     }
-
-    //include whereString in SQL, empty string if no filters passed in
-    const sqlSelect = `SELECT handle,
-    name,
-    description,
-    num_employees AS "numEmployees",
-    logo_url AS "logoUrl"
-    FROM companies
-    ${whereString}
-    ORDER BY name`;
-
-    const companiesRes = await db.query(sqlSelect, queryParams);
-
-    if (companiesRes.rows.length != 0) {
-      return companiesRes.rows;
-    }
-
-    return [];
+    return { whereString, queryParams };
   }
 
   //   Models/company:
