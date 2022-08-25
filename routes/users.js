@@ -7,10 +7,7 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const {
-  authenticateJWT,
-  ensureLoggedIn,
   ensureAdmin,
-  ensureCorrectUser,
   ensureAdminOrCorrectUser,
 } = require("../middleware/auth");
 

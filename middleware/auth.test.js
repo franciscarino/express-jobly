@@ -2,7 +2,12 @@
 
 const jwt = require("jsonwebtoken");
 const { UnauthorizedError } = require("../expressError");
-const { authenticateJWT, ensureLoggedIn } = require("./auth");
+const {
+  authenticateJWT,
+  ensureLoggedIn,
+  ensureAdmin,
+  ensureAdminOrCorrectUser,
+} = require("./auth");
 
 const { SECRET_KEY } = require("../config");
 const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
@@ -71,25 +76,61 @@ describe("ensureLoggedIn", function () {
   });
 });
 
+//added
 describe("ensureAdmin", function () {
   test("works", function () {
-    //QUESTION: Can you please explain assertions? Booleans for req/res?
+    
 
     expect.assertions(1);
     const req = {};
-    const res = { locals: { user: { is_admin: true } } };
+    const res = { locals: { user: { username: "u4", isAdmin: true } } };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    ensureAdmin(req, res, next);
+  });
+
+  test("unauth if not admin", function () {
+    expect.assertions(1);
+    const req = {};
+    const res = { locals: { user: { username: "u4", isAdmin: false } } };
+    const next = function (err) {
+      expect(err).toBeTruthy();
+    };
+    ensureAdmin(req, res, next);
+  });
+});
+
+// added
+describe("ensureAdminOrCorrectUser", function () {
+  test("works as admin", function () {
+
+    expect.assertions(1);
+    const req = {};
+    const res = { locals: { user: { isAdmin: true } } };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    ensureLoggedIn(req, res, next);
+  });
+  
+  test("works as correct", function () {
+
+    expect.assertions(1);
+    const req = { params: { username: "u1" } };
+    const res = { locals: { user: { isAdmin: false } } };
     const next = function (err) {
       expect(err).toBeFalsy();
     };
     ensureLoggedIn(req, res, next);
   });
 
-  test("unauth if not admin", function () {
+  test("unauth if not admin and incorrect user", function () {
     expect.assertions(1);
     const req = {};
-    const res = { locals: { user: { is_admin: false } } };
+    const res = { locals: { } };
     const next = function (err) {
-      expect(err).toBeFalsy();
+      expect(err).toBeTruthy();
     };
     ensureLoggedIn(req, res, next);
   });
