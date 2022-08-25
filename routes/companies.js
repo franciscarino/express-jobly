@@ -51,7 +51,7 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   const queryFilters = req.query;
-
+  //QUESTION: should we do this here and fail fast or pass bad parameters to the function
   const { minEmployees, maxEmployees } = queryFilters;
   if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
     throw new BadRequestError("minEmployees must be <= maxEmployees")

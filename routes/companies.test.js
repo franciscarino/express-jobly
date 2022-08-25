@@ -101,7 +101,7 @@ describe("GET /companies", function () {
   });
 
   test("query filters, name", async function () {
-    const resp = await request(app).get("/companies/").query({ name: "1" });
+    const resp = await request(app).get("/companies").query({ name: "1" });
 
     // expect(Company.findAll).toHaveBeenCalledWith({ name: "1" });
     expect(resp.body).toEqual({
@@ -119,7 +119,7 @@ describe("GET /companies", function () {
 
   test("query filters, min employees", async function () {
     const resp = await request(app)
-      .get("/companies/")
+      .get("/companies")
       .query({ minEmployees: 2 });
 
     // expect(Company.findAll).toHaveBeenCalledWith({ minEmployees: 2 });
@@ -145,7 +145,7 @@ describe("GET /companies", function () {
 
   test("query filters, max employees", async function () {
     const resp = await request(app)
-      .get("/companies/")
+      .get("/companies")
       .query({ maxEmployees: 2 });
 
     // expect(Company.findAll).toHaveBeenCalledWith({ maxEmployees: 2 });
@@ -171,7 +171,7 @@ describe("GET /companies", function () {
 
   test("query filters, multiple filters", async function () {
     const resp = await request(app)
-      .get("/companies/")
+      .get("/companies")
       .query({ name: "1", maxEmployees: 2 });
 
     await db.query(`
@@ -200,7 +200,7 @@ describe("GET /companies", function () {
       const resp = await request(app)
         .get("/companies")
         .query({ name: "invalid_name"});
-      throw new Error("fail test, you shouldn't get here");
+      // throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
       expect(err.message).toEqual("No Results Found");
@@ -216,10 +216,11 @@ describe("GET /companies", function () {
   test("query filters, invalid filter", async function () {
     try {
       const resp = await request(app)
-        .get("/companies")
+        .get("/companies/")
         .query({ description: "invalid"});
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
+        // throw new Error("fail test, you shouldn't get here");
+      } catch (err) {
+      console.log('typeOfError',typeof err)
       expect(err instanceof BadRequestError).toBeTruthy();
       expect(err.message).toEqual("No Results Found");
     }

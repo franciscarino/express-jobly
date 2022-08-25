@@ -1,7 +1,7 @@
 "use strict";
 
-const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
+const db = require("../db");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
@@ -52,11 +52,14 @@ class Company {
 
   static async findAll(queryFilters = {}) {
     //QUESTION: Should we break this up
+    
     //makes whereString like: 'WHERE name ilike $1 and min_employees <=10'
-
     for (let key in queryFilters) {
       const filters = ["name", "minEmployees", "maxEmployees"];
-      if (!filters.includes(key)) throw new BadRequestError("Invalid filter.");
+      if (!filters.includes(key)) {
+        console.log("in bad query filter if")
+        throw new BadRequestError("Invalid filter.");
+      }
     }
 
     let whereString = "";
@@ -96,8 +99,9 @@ class Company {
       return companiesRes.rows;
     }
 
-    console.log("companiesRes", companiesRes.rows);
+    console.log("companiesRes hi", companiesRes.rows);
     throw new BadRequestError(`No Results Found`);
+    
     //QUESTION: WHAT IS GOING ON HERE?!?!?!
   }
 
