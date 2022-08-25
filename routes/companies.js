@@ -54,7 +54,6 @@ router.get("/", async function (req, res, next) {
   //TODO: Refactor to shorten: convert min max to integers
 
   let newReq = Object.assign(req.query);
-  console.log("newReq: ", newReq);
 
   if (newReq.minEmployees) {
     newReq.minEmployees = parseInt(newReq.minEmployees);
@@ -73,14 +72,7 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-  const queryFilters = req.query;
-  //TODO: Move below to the model
-
-  const { minEmployees, maxEmployees } = queryFilters;
-  if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
-    throw new BadRequestError("minEmployees must be <= maxEmployees");
-  }
-
+  const queryFilters = newReq;
   const companies = await Company.findAll(queryFilters);
 
   return res.json({ companies });

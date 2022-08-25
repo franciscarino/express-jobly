@@ -51,10 +51,12 @@ class Company {
    * */
 
   static async findAll(queryFilters = {}) {
-    //QUESTION: S
+    const { minEmployees, maxEmployees } = queryFilters;
+    if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
+      throw new BadRequestError("minEmployees must be <= maxEmployees");
+    }
 
     //makes whereString like: 'WHERE name ilike $1 and min_employees <=10'
-
     let whereString = "";
     let queryParams = [];
 
@@ -64,7 +66,7 @@ class Company {
       whereString = "WHERE ";
       if (queryFilters.name) {
         queryParams.push(`%${queryFilters.name}%`);
-        whereString += `name ilike $1 `; // TODO: use length
+        whereString += `name ilike $${queryParams.length} `;
       }
       if (queryFilters.minEmployees) {
         whereString += queryParams.length > 0 ? "and " : "";
@@ -94,7 +96,7 @@ class Company {
       return companiesRes.rows;
     }
 
-    throw new BadRequestError(`No Results Found`); // TODO: Just return an empty array
+    return [];
   }
 
   //   Models/company:

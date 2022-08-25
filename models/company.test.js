@@ -144,7 +144,7 @@ describe("findAll", function () {
     await db.query(`
     INSERT INTO companies(handle, name, num_employees, description, logo_url)
     VALUES ('c4', 'C4', 2, 'Desc1', 'http://c1.img')`);
-
+    
     let companies = await Company.findAll({
       name: "1",
       maxEmployees: 2,
@@ -159,42 +159,17 @@ describe("findAll", function () {
       },
     ]);
   });
-
+  
   test("query with no results", async function () {
-    try {
       let companies = await Company.findAll({
         name: "1",
         minEmployees: 2,
         maxEmployees: 2,
       });
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-      expect(err.message).toEqual("No Results Found");
-    }
-  });
-
-  test("query with invalid filter", async function () {
-    try {
-      let companies = await Company.findAll({
-        description: "anything",
-      });
-      console.log("companies ", companies);
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-      expect(err.message).toEqual("Invalid filter.");
-    }
+      expect(companies).toEqual([]);  
   });
 });
 
-// model test:
-// - multiple happy paths:
-//     - name
-//     - min emp
-//     - max emp
-//     - all of them
-//     - query with no results QUESTION: how many of these?
 
 /************************************** get */
 

@@ -199,7 +199,7 @@ describe("GET /companies", function () {
       .get("/companies")
       .query({ name: "invalid_name" });
 
-    expect(resp.statusCode).toEqual(400);
+    expect(resp.body).toEqual({companies: [] });
   });
 
   test("query filters, invalid filter", async function () {
