@@ -3,7 +3,8 @@ const bcrypt = require("bcrypt");
 const db = require("../db.js");
 const { BCRYPT_WORK_FACTOR } = require("../config");
 
-let j1Id;
+//FIXME: this doesn't pull forward correctly
+let j1Id = 0;
 
 async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
@@ -25,8 +26,9 @@ async function commonBeforeAll() {
            ('J2', '200000', 0.0002, 'c1'),
            ('J3', '300000', 0.0003, 'c2')
            RETURNING id`);
-
+  console.log("jobIds",jobIds.rows[0].id)
   j1Id = jobIds.rows[0];
+  console.log("j1Id in _testCommon",j1Id)
 
   await db.query(
     `

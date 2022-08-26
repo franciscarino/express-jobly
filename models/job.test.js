@@ -51,16 +51,6 @@ describe("create", function () {
       },
     ]);
   });
-
-  test("bad request with dupe", async function () {
-    try {
-      await Jobs.create(newJob);
-      await Jobs.create(newJob);
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
 });
 
 /************************************** findAll */
@@ -73,22 +63,22 @@ describe("findAll", function () {
         id: expect.any(Number),
         title: "J1",
         salary: 100000,
-        equity: 0.0001,
-        company_handle: "c1",
+        equity: "0.0001",
+        companyHandle: "c1",
       },
       {
         id: expect.any(Number),
         title: "J2",
         salary: 200000,
-        equity: 0.0002,
-        company_handle: "c2",
+        equity: "0.0002",
+        companyHandle: "c1",
       },
       {
         id: expect.any(Number),
         title: "J3",
         salary: 300000,
-        equity: 0.0003,
-        company_handle: "c2",
+        equity: "0.0003",
+        companyHandle: "c2",
       },
     ]);
   });
@@ -104,8 +94,8 @@ describe("get", function () {
       id: j1Id,
       title: "J1",
       salary: 100000,
-      equity: 0.0001,
-      company_handle: "c1",
+      equity: "0.0001",
+      companyHandle: "c1",
     });
   });
 
@@ -125,7 +115,7 @@ describe("update", function () {
   const updateData = {
     title: "J1-udpate",
     salary: 100001,
-    equity: 0.00005,
+    equity: "0.00005",
   };
 
   test("works", async function () {
@@ -136,7 +126,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-      `SELECT id, title, salary, equity, company_handle
+      `SELECT id, title, salary, equity, company_handle as "companyHandle"
            FROM jobs
             WHERE id = ${j1Id}`
     );
@@ -145,8 +135,8 @@ describe("update", function () {
         id: j1Id,
         title: "J1-udpate",
         salary: 100001,
-        equity: 0.00005,
-        company_handle: "c1",
+        equity: "0.00005",
+        companyHandle: "c1",
       },
     ]);
   });
@@ -166,7 +156,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-      `SELECT id, title, salary, equity, company_handle
+      `SELECT id, title, salary, equity, company_handle as "companyHandle"
         FROM jobs
         WHERE id = ${j1Id}`
     );
@@ -176,7 +166,7 @@ describe("update", function () {
         title: "J1-udpate",
         salary: null,
         equity: null,
-        company_handle: "c1",
+        companyHandle: "c1",
       },
     ]);
   });

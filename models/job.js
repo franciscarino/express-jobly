@@ -30,45 +30,14 @@ class Job {
   /** Find all jobs* */
 
   static async findAll() {
-    const sqlSelect = `SELECT title, salary, equity, company_handle
-    FROM jobs
-    ORDER BY title`;
+    const sqlSelect = 
+    `SELECT id, title, salary, equity, company_handle  as "companyHandle"
+      FROM jobs
+      ORDER BY title`;
 
     const jobsRes = await db.query(sqlSelect);
 
     return jobsRes.rows;
-  }
-
-  /** generate whereString for passed in search filters
-   * pass in queryFilters like: {name, minEmployees, maxEmployees}
-   * return object like: {
-   *  whereString: 'WHERE name ilike $1 and min_employees <=10',
-   *  queryParams: [ %compName%, 1, 5]
-   *  }
-   */
-
-  static _generateWhereString(queryFilters) {
-    let whereString = "";
-    let queryParams = [];
-
-    if (Object.keys(queryFilters).length != 0) {
-      whereString = "WHERE ";
-      if (queryFilters.name) {
-        queryParams.push(`%${queryFilters.name}%`);
-        whereString += `name ilike $${queryParams.length} `;
-      }
-      if (queryFilters.minEmployees) {
-        whereString += queryParams.length > 0 ? "and " : "";
-        queryParams.push(queryFilters.minEmployees);
-        whereString += `num_employees >= $${queryParams.length} `;
-      }
-      if (queryFilters.maxEmployees) {
-        whereString += queryParams.length > 0 ? "and " : "";
-        queryParams.push(queryFilters.maxEmployees);
-        whereString += `num_employees <= $${queryParams.length} `;
-      }
-    }
-    return { whereString, queryParams };
   }
 
   /** Given a job handle, return data about job.
@@ -79,21 +48,17 @@ class Job {
    * Throws NotFoundError if not found.
    **/
 
-  static async get(handle) {
+  static async get(id) {
     const jobRes = await db.query(
-      `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM jobs
-           WHERE handle = $1`,
-      [handle]
+      `SELECT id, title, salary, equity, company_handle  as "companyHandle"
+      FROM jobs
+      Where id = $1`,
+      [id]
     );
-
+      console.log("id",id)
     const job = jobRes.rows[0];
 
-    if (!job) throw new NotFoundError(`No job: ${handle}`);
+    if (!job) throw new NotFoundError(`No job: ${id}`);
 
     return job;
   }
