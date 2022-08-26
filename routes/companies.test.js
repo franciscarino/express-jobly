@@ -33,7 +33,6 @@ describe("POST /companies", function () {
     description: "DescNew",
     numEmployees: 10,
   };
-  //TODO: Make this pass
 
   //update from ok for user to ok for admins
   test("ok for admins", async function () {
@@ -231,7 +230,7 @@ describe("GET /companies", function () {
     await db.query("DROP TABLE companies CASCADE");
     const resp = await request(app)
       .get("/companies")
-      .set("authorization", `Bearer ${u1Token}`);
+      .set("authorization", `Bearer ${u4Token}`);
     expect(resp.statusCode).toEqual(500);
   });
 });
@@ -354,7 +353,7 @@ describe("DELETE /companies/:handle", function () {
     expect(resp.body).toEqual({ deleted: "c1" });
   });
   //add sad route for non-admin user
-  test("works for admins", async function () {
+  test("unauth for non-admin user", async function () {
     const resp = await request(app)
       .delete(`/companies/c1`)
       .set("authorization", `Bearer ${u1Token}`);
