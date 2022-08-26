@@ -111,4 +111,6 @@ describe("POST /auth/register", function () {
         });
     expect(resp.statusCode).toEqual(400);
   });
+  //TODO:
+  //Add test for register, which should never be an admin
 });

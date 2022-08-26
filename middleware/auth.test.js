@@ -80,7 +80,6 @@ describe("ensureLoggedIn", function () {
 describe("ensureAdmin", function () {
   test("works", function () {
     
-
     expect.assertions(1);
     const req = {};
     const res = { locals: { user: { username: "u4", isAdmin: true } } };
@@ -95,7 +94,7 @@ describe("ensureAdmin", function () {
     const req = {};
     const res = { locals: { user: { username: "u4", isAdmin: false } } };
     const next = function (err) {
-      expect(err).toBeTruthy();
+      expect(err instanceof UnauthorizedError).toBeTruthy();
     };
     ensureAdmin(req, res, next);
   });
@@ -130,7 +129,7 @@ describe("ensureAdminOrCorrectUser", function () {
     const req = {};
     const res = { locals: { } };
     const next = function (err) {
-      expect(err).toBeTruthy();
+      expect(err instanceof UnauthorizedError).toBeTruthy();
     };
     ensureLoggedIn(req, res, next);
   });

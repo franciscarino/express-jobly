@@ -56,7 +56,7 @@ class Company {
       throw new BadRequestError("minEmployees must be <= maxEmployees");
     }
 
-    const { whereString, queryParams } = this.generateWhereString(queryFilters);
+    const { whereString, queryParams } = this._generateWhereString(queryFilters);
 
     //include whereString in SQL, empty string if no filters passed in
     const sqlSelect = `SELECT handle,
@@ -81,7 +81,7 @@ class Company {
    *  }
    */
 
-  static generateWhereString(queryFilters) {
+  static _generateWhereString(queryFilters) {
     let whereString = "";
     let queryParams = [];
 

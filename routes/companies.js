@@ -53,6 +53,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+
   let newReq = Object.assign(req.query);
   if (newReq.minEmployees) newReq.minEmployees = parseInt(newReq.minEmployees);
   if (newReq.maxEmployees) newReq.maxEmployees = parseInt(newReq.maxEmployees);
