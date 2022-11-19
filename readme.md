@@ -11,7 +11,3 @@ To run this:
 To run the tests:
 
     jest -i
-
-Part 4:
-
-Question: JSON schema reference
